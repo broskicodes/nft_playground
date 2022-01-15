@@ -1,21 +1,16 @@
-import { TOKEN_PROGRAM_ID } from '@project-serum/serum/lib/token-instructions';
 import { WalletNotConnectedError } from '@solana/wallet-adapter-base';
 import { useConnection, useWallet, useAnchorWallet } from '@solana/wallet-adapter-react';
 import { Keypair, SystemProgram, Transaction, PublicKey } from '@solana/web3.js';
+import { Token, TOKEN_PROGRAM_ID } from '@solana/spl-token'
 import React, { useCallback } from 'react';
 import { Metadata } from "@metaplex-foundation/mpl-token-metadata";
 import idl from "../../idl.json";
 import { Idl, Program, Provider, web3, BN } from '@project-serum/anchor';
-
-import { 
-  createMint, 
-  createTokenAccount,
-  getTokenAccount,
-  TokenInstructions,
-  airDropSol,
-} from "../../helpers";
+import solKP from '../../keypairs/solKeypair.json';
 
 const programAddress =  new PublicKey(idl.metadata.address);
+const appAccount = Keypair.fromSecretKey(Uint8Array.from(Object.values(solKP._keypair.secretKey)));
+
 
 export const Minter = () => {
     const { connection } = useConnection();
@@ -49,10 +44,19 @@ export const Minter = () => {
       }
 
       let enc = new TextEncoder();
-      // let baseAccount = Keypair.generate();
 
-      const mint = await createMint(provider, provider.wallet.publicKey);
-      const to = await createTokenAccount(provider, mint, provider.wallet.publicKey);
+      const mint = await Token.createMint(
+        connection, 
+        appAccount, 
+        walletObj.publicKey, 
+        null, 0, 
+        TOKEN_PROGRAM_ID
+      );
+
+      const to = await mint.getOrCreateAssociatedAccountInfo(walletObj.publicKey);
+
+      // const mint = await createMint(provider, provider.wallet.publicKey);
+      // const to = await createTokenAccount(provider, mint, provider.wallet.publicKey);
       const tokenMetadataProgram = new PublicKey("metaqbxxUerdq28cj1RbAWkYQm3ybzjb6a8bt518x1s");
 
 
@@ -61,7 +65,7 @@ export const Minter = () => {
           // edition,
           enc.encode('metadata'),
           tokenMetadataProgram.toBytes(),
-          mint.toBytes()
+          mint.publicKey.toBytes()
         ],
         tokenMetadataProgram
       );
@@ -69,7 +73,7 @@ export const Minter = () => {
         [
           enc.encode('metadata'),
           tokenMetadataProgram.toBytes(),
-          mint.toBytes(),
+          mint.publicKey.toBytes(),
           enc.encode('edition'),
         ],
         tokenMetadataProgram
@@ -78,9 +82,9 @@ export const Minter = () => {
       await program.rpc.proxyMintTo(new BN(1), {
         accounts: {
           authority: provider.wallet.publicKey,
-          mint: mint,
-          to: to,
-          tokenProgram: TokenInstructions.TOKEN_PROGRAM_ID,
+          mint: mint.publicKey,
+          to: to.address,
+          tokenProgram: TOKEN_PROGRAM_ID,
         },
       });
 
@@ -96,13 +100,13 @@ export const Minter = () => {
           accounts: {
             tokenMetadataProgram,
             metadata,
-            mint,
+            mint: mint.publicKey,
             edition,
             mintAuthority: provider.wallet.publicKey,
             payer: provider.wallet.publicKey,
             updateAuthority: provider.wallet.publicKey,
             systemProgram: SystemProgram.programId,
-            tokenProgram: TokenInstructions.TOKEN_PROGRAM_ID,
+            tokenProgram: TOKEN_PROGRAM_ID,
             rent: web3.SYSVAR_RENT_PUBKEY,
           },
         }
