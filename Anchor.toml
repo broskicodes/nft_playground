@@ -1,0 +1,12 @@
+[programs.devnet]
+nft_playground = "EwqRHfatAThKS5omRMFBRdNtntVD4CqgyXfiDiwvh2Cm"
+
+[registry]
+url = "https://anchor.projectserum.com"
+
+[provider]
+cluster = "devnet"
+wallet = "/home/braeden/.config/solana/devnet.json"
+
+[scripts]
+test = "mocha -t 1000000 tests/"
