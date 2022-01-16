@@ -1,6 +1,10 @@
 use anchor_lang::prelude::*;
-use metaplex_token_metadata::instruction::{ create_metadata_accounts, create_master_edition };
-use metaplex_token_metadata::state::{ Creator };
+use metaplex_token_metadata::instruction::{ 
+  create_metadata_accounts, 
+  create_master_edition, 
+  mint_new_edition_from_master_edition_via_token,
+};
+// use metaplex_token_metadata::state::{ Creator };
 use solana_program::program::invoke;
 use anchor_spl::token::Token;
 
@@ -34,7 +38,7 @@ pub fn mint_nft(
     is_mutable,
   );
 
-  let accounts_list: Vec<AccountInfo> = vec![
+  let metadata_accounts_list: Vec<AccountInfo> = vec![
     accounts.token_metadata_program.to_account_info(),
     accounts.metadata.to_account_info(),
     accounts.mint.to_account_info(),
@@ -48,12 +52,12 @@ pub fn mint_nft(
 
   invoke(
     &create_metadata_instruction, 
-    accounts_list.as_slice(),
+    metadata_accounts_list.as_slice(),
   )?;
 
   let create_master_instruction = create_master_edition(
     *accounts.token_metadata_program.key,
-    *accounts.edition.key,
+    *accounts.master_edition.key,
     *accounts.mint.key,
     *accounts.update_authority.key,
     *accounts.mint_authority.key,
@@ -62,7 +66,7 @@ pub fn mint_nft(
     max_supply,
   );
 
-  let accounts_list: Vec<AccountInfo> = vec![
+  let edition_accounts_list: Vec<AccountInfo> = vec![
     accounts.token_metadata_program.to_account_info(),
     accounts.metadata.to_account_info(),
     accounts.mint.to_account_info(),
@@ -72,12 +76,61 @@ pub fn mint_nft(
     accounts.system_program.to_account_info(),
     accounts.token_program.to_account_info(),
     accounts.rent.to_account_info(),
-    accounts.edition.to_account_info(),
+    accounts.master_edition.to_account_info(),
   ];
 
   invoke(
     &create_master_instruction, 
-    accounts_list.as_slice(),
+    edition_accounts_list.as_slice(),
+  )?;
+
+  Ok(())
+}
+
+pub fn mint_edition_from_master(
+  ctx: Context<MintEditionFromMaster>,
+  edition: u64,
+) -> ProgramResult {
+  let accounts = & ctx.accounts;
+
+
+  let mint_edition_instruction = mint_new_edition_from_master_edition_via_token(
+    *accounts.token_metadata_program.key,
+    *accounts.new_metadata.key,
+    *accounts.new_edition.key,
+    *accounts.master_edition.key,
+    *accounts.new_mint.key,
+    *accounts.new_mint_authority.key,
+    *accounts.payer.key,
+    *accounts.token_account_owner.key,
+    *accounts.token_account.key,
+    *accounts.new_metadata_update_authority.key,
+    *accounts.metadata.key,
+    *accounts.metadata_mint.key,
+    edition,
+  );
+
+  let account_list: Vec<AccountInfo> = vec![
+    accounts.token_metadata_program.to_account_info(),
+    accounts.new_metadata.to_account_info(),
+    accounts.new_edition.to_account_info(),
+    accounts.master_edition.to_account_info(),
+    accounts.new_mint.to_account_info(),
+    accounts.new_mint_authority.to_account_info(),
+    accounts.payer.to_account_info(),
+    accounts.token_account_owner.to_account_info(),
+    accounts.token_account.to_account_info(),
+    accounts.new_metadata_update_authority.to_account_info(),
+    accounts.metadata.to_account_info(),
+    accounts.metadata_mint.to_account_info(),
+    accounts.token_program.to_account_info(),
+    accounts.system_program.to_account_info(),
+    accounts.rent.to_account_info(),
+  ];
+
+  invoke(
+    &mint_edition_instruction, 
+    account_list.as_slice(),
   )?;
 
   Ok(())
@@ -86,7 +139,7 @@ pub fn mint_nft(
 #[derive(Accounts)]
 pub struct MintNft<'info> {
   #[account(mut)]
-  pub edition: UncheckedAccount<'info>,
+  pub master_edition: UncheckedAccount<'info>,
   #[account(mut)]
   pub metadata: UncheckedAccount<'info>,
   #[account(mut)]
@@ -95,6 +148,34 @@ pub struct MintNft<'info> {
   #[account(mut)]
   pub payer: Signer<'info>,
   pub update_authority: UncheckedAccount<'info>,
+  #[account(address = metaplex_token_metadata::id())]
+  pub token_metadata_program: UncheckedAccount<'info>,
+  pub system_program: Program<'info, System>,
+  pub token_program: Program<'info, Token>,
+  pub rent: Sysvar<'info, Rent>
+}
+
+#[derive(Accounts)]
+pub struct MintEditionFromMaster<'info> {
+  #[account(mut)]
+  pub new_edition: UncheckedAccount<'info>,
+  #[account(mut)]
+  pub master_edition: UncheckedAccount<'info>,
+  #[account(mut)]
+  pub new_metadata: UncheckedAccount<'info>,
+  #[account(mut)]
+  pub new_metadata_update_authority: UncheckedAccount<'info>,
+  #[account(mut)]
+  pub metadata: UncheckedAccount<'info>,
+  #[account(mut)]
+  pub metadata_mint: UncheckedAccount<'info>,
+  #[account(mut)]
+  pub new_mint: UncheckedAccount<'info>,
+  pub new_mint_authority: Signer<'info>,
+  #[account(mut)]
+  pub payer: Signer<'info>,
+  pub token_account_owner: UncheckedAccount<'info>,
+  pub token_account: UncheckedAccount<'info>,
   #[account(address = metaplex_token_metadata::id())]
   pub token_metadata_program: UncheckedAccount<'info>,
   pub system_program: Program<'info, System>,

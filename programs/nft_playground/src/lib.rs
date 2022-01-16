@@ -53,18 +53,13 @@ pub mod nft_playground {
       )
     }
 
-    // pub fn proxy_create_master(
-    //   ctx: Context<CreateMaster>, 
-    //   max_supply: Option<u64>
-    // ) -> ProgramResult {
-    //   nft::create_master(ctx, max_supply)
-    // }
+    pub fn proxy_mint_edition_from_master(
+      ctx: Context<MintEditionFromMaster>, 
+      edition: u64,
+    ) -> ProgramResult {
+      nft::mint_edition_from_master(ctx, edition)
+    }
 
-    // pub fn mint_master(ctx: Context<MintMaster>) -> ProgramResult {
-    //   let _base_account = &mut ctx.accounts.base_account;
-
-    //   Ok(())
-    // }
 }
 
 

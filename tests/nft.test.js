@@ -58,7 +58,7 @@ describe('nft', () => {
     );
   });
 
-  it('Mints one!', async () => {
+  it('Mints token!', async () => {
     const tx = await program.rpc.proxyMintTo(new anchor.BN(1), {
       accounts: {
         authority: baseAccount.publicKey,
@@ -74,7 +74,7 @@ describe('nft', () => {
     assert.ok(tokAcnt.amount.eq(new anchor.BN(1)));
   });
 
-  it('Mints nft!', async () => {
+  it('Creates nft!', async () => {
     const tx = await program.rpc.proxyMintNft(
       "name",
       "",
@@ -88,7 +88,7 @@ describe('nft', () => {
           tokenMetadataProgram,
           metadata,
           mint,
-          edition: masterEdition,
+          masterEdition,
           mintAuthority: baseAccount.publicKey,
           payer: baseAccount.publicKey,
           updateAuthority: provider.wallet.publicKey,
@@ -106,5 +106,60 @@ describe('nft', () => {
 
     connection.getAccountInfo(masterEdition)
       .then(ai => assert.eq(ai.owner, tokenMetadataProgram));
+  });
+
+  it('Mints edition!', async () => {
+    const newMint = await createMint(provider, provider.wallet.publicKey);
+    const tokenAccount = await createTokenAccount(provider, newMint, provider.wallet.publicKey);
+
+    let enc = new TextEncoder();
+    const [newMetadata, bump1] = await PublicKey.findProgramAddress(
+      [
+        enc.encode('metadata'),
+        tokenMetadataProgram.toBytes(),
+        newMint.toBytes()
+      ],
+      tokenMetadataProgram
+    );
+    const [newEdition, bump2] = await PublicKey.findProgramAddress(
+      [
+        enc.encode('metadata'),
+        tokenMetadataProgram.toBytes(),
+        newMint.toBytes(),
+        enc.encode('edition'),
+      ],
+      tokenMetadataProgram
+    );
+
+    const tx = await program.rpc.proxyMintEditionFromMaster(
+      new anchor.BN(0),
+      {
+        accounts: {
+          newMetadata,
+          newEdition,
+          newMint,
+          newMintAuthority: provider.wallet.publicKey,
+          tokenMetadataProgram,
+          metadata,
+          metadataMint: mint,
+          newMetadataUpdateAuthority: provider.wallet.publicKey,
+          masterEdition,
+          payer: baseAccount.publicKey,
+          tokenAccountOwner: provider.wallet.publicKey,
+          tokenAccount,
+          systemProgram: anchor.web3.SystemProgram.programId,
+          tokenProgram: TokenInstructions.TOKEN_PROGRAM_ID,
+          rent: anchor.web3.SYSVAR_RENT_PUBKEY,
+        },
+        signers: [baseAccount],
+      },
+    );
+    // console.log("Your transaction signature", tx);
+    // const connection = new anchor.web3.Connection(anchor.web3.clusterApiUrl("devnet"), "confirmed");
+    // connection.getAccountInfo(metadata)
+    //   .then(ai => assert.equal(ai.owner, tokenMetadataProgram));
+
+    // connection.getAccountInfo(masterEdition)
+    //   .then(ai => assert.eq(ai.owner, tokenMetadataProgram));
   });
 });
