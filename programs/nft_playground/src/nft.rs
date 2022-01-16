@@ -110,19 +110,19 @@ pub fn mint_edition_from_master(
     edition,
   );
 
+
   let account_list: Vec<AccountInfo> = vec![
-    accounts.token_metadata_program.to_account_info(),
     accounts.new_metadata.to_account_info(),
     accounts.new_edition.to_account_info(),
     accounts.master_edition.to_account_info(),
     accounts.new_mint.to_account_info(),
+    accounts.edition_mark.to_account_info(),
     accounts.new_mint_authority.to_account_info(),
     accounts.payer.to_account_info(),
     accounts.token_account_owner.to_account_info(),
     accounts.token_account.to_account_info(),
     accounts.new_metadata_update_authority.to_account_info(),
     accounts.metadata.to_account_info(),
-    accounts.metadata_mint.to_account_info(),
     accounts.token_program.to_account_info(),
     accounts.system_program.to_account_info(),
     accounts.rent.to_account_info(),
@@ -157,6 +157,8 @@ pub struct MintNft<'info> {
 
 #[derive(Accounts)]
 pub struct MintEditionFromMaster<'info> {
+  #[account(mut)]
+  pub edition_mark: UncheckedAccount<'info>,
   #[account(mut)]
   pub new_edition: UncheckedAccount<'info>,
   #[account(mut)]
