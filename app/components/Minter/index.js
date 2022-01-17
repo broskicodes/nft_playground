@@ -7,6 +7,7 @@ import { Metadata } from "@metaplex-foundation/mpl-token-metadata";
 import idl from "../../idl.json";
 import { Idl, Program, Provider, web3, BN } from '@project-serum/anchor';
 import solKP from '../../keypairs/solKeypair.json';
+import { getProvider } from '../../helpers';
 
 const programAddress =  new PublicKey(idl.metadata.address);
 const appAccount = Keypair.fromSecretKey(Uint8Array.from(Object.values(solKP._keypair.secretKey)));
@@ -17,22 +18,12 @@ export const Minter = () => {
     const { publicKey, sendTransaction } = useWallet();
     const walletObj = useAnchorWallet();
 
-    const getProvider = () => {
-      if(!walletObj){
-        return
-      }
-      const provider = new Provider(
-        connection, walletObj, { preflightCommitment: "confirmed" },
-      );
-      return provider;
-    }
-
     const mintNFT = async () => {
       if(!publicKey){
         return;
       }
 
-      const provider = getProvider();
+      const provider = getProvider(walletObj);
       const program = new Program(idl, programAddress, provider)
 
       const data = {
@@ -113,10 +104,19 @@ export const Minter = () => {
       );
     }
 
+    const mintEdition = () => {
+
+    }
+
     return (
+      <div>
         <button onClick={mintNFT} disabled={!publicKey}>
-          Press
+          Mint New NFT
         </button>
-        // <button onClick={}
+
+        <button onClick={mintEdition} disabled={!publicKey}>
+          Mint Edition
+        </button>
+      </div>
     );
 };

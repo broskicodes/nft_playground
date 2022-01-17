@@ -32,7 +32,7 @@ export const Wallet = ({ children }) => {
             <WalletProvider wallets={wallets} autoConnect>
                 <WalletModalProvider>
                     <WalletMultiButton />
-
+                    <br />
                     {children}
                 </WalletModalProvider>
             </WalletProvider>
