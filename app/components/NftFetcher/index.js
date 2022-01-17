@@ -7,7 +7,7 @@ import { Token, TOKEN_PROGRAM_ID } from '@solana/spl-token'
 import { Metadata } from "@metaplex-foundation/mpl-token-metadata";
 
 
-export const NftFetcher = () => {
+export const NftFetcher = ({ setSelectedNft }) => {
   const { connection } = useConnection();
   const { publicKey, sendTransaction } = useWallet();
   const walletObj = useAnchorWallet();
@@ -37,8 +37,8 @@ export const NftFetcher = () => {
     const mtdt = await verifyNfts(nfts);
     console.log(mtdt);
 
-    setNftMetadata(mtdt);
-    getImgBlobs(mtdt);
+    let imgsSrc = await getImgBlobs(mtdt);
+    // setNftMetadata(src);
   }
 
   const verifyNfts = async (possibleNfts) => {
@@ -61,7 +61,8 @@ export const NftFetcher = () => {
       try {
         metadata = await Metadata.load(connection, metadataAccount);
         // nfts.push(metadata);
-        return metadata;
+        acc['metadata'] = metadata;
+        return acc;
       } catch(e) {
         return null;
       }
@@ -76,8 +77,8 @@ export const NftFetcher = () => {
   }
 
   const getImgBlobs = async (mtdt) => {
-    let promises = mtdt.map(async (mtd) => {
-      const res = await fetch(mtd.data.data.uri);
+    let promises = mtdt.map(async (acc) => {
+      const res = await fetch(acc.metadata.data.data.uri);
       const json = await res.json();
 
       const imgRes = await fetch(json.image);
@@ -87,30 +88,36 @@ export const NftFetcher = () => {
       const imgSrc = URL.createObjectURL(imgBlob);
 
       console.log(imgSrc)
+      acc['src'] = imgSrc;
 
-      return imgSrc;
+      return acc;
     });
 
     const imgs = await Promise.all(promises);
 
-    setNftImgSrc(imgs);
+    setNftMetadata(imgs);
   }  
 
-  useEffect(async () => {
-    // const onLoad = async () => {
-      await getNfts();
-    // };
-    // window.addEventListener('load', onLoad);
-    // return () => window.removeEventListener('load', onLoad);
-  }
-  , []);
+  // useEffect(() => {
+  //   const onLoad = async () => {
+  //     await getNfts();
+  //   };
+  //   window.addEventListener('load', onLoad);
+  //   return () => window.removeEventListener('load', onLoad);
+  // }
+  // , []);
 
   return (
     <div>
-      {nftImgSrc.length > 0 && 
+      {!!publicKey && 
+        <button onClick={getNfts}>
+          Get Nfts
+        </button>  
+      }
+      {nftMetadata.length > 0 && 
         <div>
-          {nftImgSrc.map((imgSrc, i) => (
-            <img key={i} src={imgSrc} />
+          {nftMetadata.map((mtdt, i) => (
+            <img key={i} src={mtdt.src} onClick={() => { setSelectedNft(mtdt) }} />
           ))}
         </div>  
       }

@@ -133,7 +133,7 @@
       "name": "proxyMintNft",
       "accounts": [
         {
-          "name": "edition",
+          "name": "masterEdition",
           "isMut": true,
           "isSigner": false
         },
@@ -213,6 +213,97 @@
           "type": {
             "option": "u64"
           }
+        }
+      ]
+    },
+    {
+      "name": "proxyMintEditionFromMaster",
+      "accounts": [
+        {
+          "name": "editionMark",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "newEdition",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "masterEdition",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "newMetadata",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "newMetadataUpdateAuthority",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "metadata",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "metadataMint",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "newMint",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "newMintAuthority",
+          "isMut": false,
+          "isSigner": true
+        },
+        {
+          "name": "payer",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "tokenAccountOwner",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "tokenAccount",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "tokenMetadataProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "tokenProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "rent",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "edition",
+          "type": "u64"
         }
       ]
     }

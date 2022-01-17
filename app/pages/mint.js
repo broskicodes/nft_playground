@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { 
   ArweaveUploader, 
   Minter, 
@@ -6,10 +7,17 @@ import {
 } from '../components';
 
 const MintPage = () => {
+  const [selectedNft, setSelectedNft] = useState(null);
+
   return (
     <Wallet>
-      <NftFetcher />
-      <Minter />
+      <NftFetcher 
+        selectedNft={selectedNft}
+        setSelectedNft={setSelectedNft}
+      />
+      <Minter 
+        selectedNft={selectedNft}
+      />
       <ArweaveUploader />
     </Wallet>
   )
