@@ -61,7 +61,7 @@ export const NftFetcher = ({ setSelectedNft }) => {
       try {
         metadata = await Metadata.load(connection, metadataAccount);
         // nfts.push(metadata);
-        acc['metadata'] = metadata;
+        acc.metdata = metadata;
         return acc;
       } catch(e) {
         return null;
@@ -83,12 +83,12 @@ export const NftFetcher = ({ setSelectedNft }) => {
 
       const imgRes = await fetch(json.image);
       const imgBlob = await imgRes.blob();
-      console.log(imgBlob);
+      // console.log(imgBlob);
 
       const imgSrc = URL.createObjectURL(imgBlob);
 
-      console.log(imgSrc)
-      acc['src'] = imgSrc;
+      // console.log(imgSrc)
+      acc.src = imgSrc;
 
       return acc;
     });

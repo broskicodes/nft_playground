@@ -15,10 +15,9 @@ const MintPage = () => {
         selectedNft={selectedNft}
         setSelectedNft={setSelectedNft}
       />
-      <Minter 
+      <ArweaveUploader 
         selectedNft={selectedNft}
       />
-      <ArweaveUploader />
     </Wallet>
   )
 }

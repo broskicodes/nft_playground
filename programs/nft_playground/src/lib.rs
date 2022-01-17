@@ -1,5 +1,5 @@
 use anchor_lang::prelude::*;
-
+// use metaplex_token_metadata::state::{ Creator };
 
 pub mod token;
 use token::*;
@@ -38,7 +38,7 @@ pub mod nft_playground {
       name: String, 
       symbol: String,
       uri: String,
-      // creators: Option<Vec<Creator>>,
+      creators: Option<Vec<Creator>>,
       seller_fee_basis_points: u16,
       update_authority_is_signer: bool,
       is_mutable: bool,
@@ -46,7 +46,7 @@ pub mod nft_playground {
     ) -> ProgramResult {
       nft::mint_nft(
         ctx, name, symbol,
-        uri, // creators,
+        uri, creators,
         seller_fee_basis_points,
         update_authority_is_signer,
         is_mutable, max_supply,

@@ -13,7 +13,12 @@ const programAddress =  new PublicKey(idl.metadata.address);
 const appAccount = Keypair.fromSecretKey(Uint8Array.from(Object.values(solKP._keypair.secretKey)));
 
 
-export const Minter = ({ selectedNft }) => {
+export const Minter = ({ 
+  selectedNft, 
+  uploadFile, 
+  uploadMetadata,
+  attributes,
+ }) => {
     const { connection } = useConnection();
     const { publicKey, sendTransaction } = useWallet();
     const walletObj = useAnchorWallet();
@@ -33,16 +38,19 @@ export const Minter = ({ selectedNft }) => {
         return;
       }
 
+      await uploadFile();
+      let uri = await uploadMetadata();
+
       const provider = getProvider();
       const program = new Program(idl, programAddress, provider);
 
-      const data = {
-        name: 'Code Monkey Dao Membership NFT',
-        symbol: '',
-        uri: 'https://arweave.net/Au_vyhLJlliPRunU7BH2SAZxBO_naOfZErPuVnoB29s',
-        sellerFeeBasisPoints: 0,
-        primarySaleHappened: false,
-      }
+      // const data = {
+      //   name: 'Code Monkey Dao Membership NFT',
+      //   symbol: '',
+      //   uri: 'https://arweave.net/Au_vyhLJlliPRunU7BH2SAZxBO_naOfZErPuVnoB29s',
+      //   sellerFeeBasisPoints: 0,
+      //   primarySaleHappened: false,
+      // }
 
       let enc = new TextEncoder();
 
@@ -86,11 +94,16 @@ export const Minter = ({ selectedNft }) => {
         },
       });
 
+      const creators = [{
+        ...attributes.creators[0],
+        address: publicKey,
+      }]
       await program.rpc.proxyMintNft(
-        data.name,
-        data.symbol,
-        data.uri,
-        data.sellerFeeBasisPoints,
+        attributes.name,
+        attributes.symbol,
+        uri,
+        creators,
+        attributes.sellerFeeBasisPoints,
         true,
         false,
         null,
@@ -99,7 +112,7 @@ export const Minter = ({ selectedNft }) => {
             tokenMetadataProgram,
             metadata,
             mint: mint.publicKey,
-            edition,
+            masterEdition: edition,
             mintAuthority: provider.wallet.publicKey,
             payer: provider.wallet.publicKey,
             updateAuthority: provider.wallet.publicKey,

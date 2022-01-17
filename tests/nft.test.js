@@ -77,11 +77,18 @@ describe('nft', () => {
   });
 
   it('Creates nft!', async () => {
+    const creators = [{
+      address: provider.wallet.publicKey,
+      verified: false,
+      share: new anchor.BN(100),
+    }];
+
     const tx = await program.rpc.proxyMintNft(
       "name",
       "",
       "uri",
-      0,
+      creators,
+      new anchor.BN(0),
       false,
       false,
       null,
@@ -182,7 +189,7 @@ describe('nft', () => {
         signers: [baseAccount],
       },
     );
-    console.log("Your transaction signature", tx);
+    // console.log("Your transaction signature", tx);
     const connection = new anchor.web3.Connection(anchor.web3.clusterApiUrl("devnet"), "confirmed");
     connection.getAccountInfo(newMetadata)
       .then(ai => assert.equal(ai.owner, tokenMetadataProgram));

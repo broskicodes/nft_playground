@@ -197,6 +197,16 @@
           "type": "string"
         },
         {
+          "name": "creators",
+          "type": {
+            "option": {
+              "vec": {
+                "defined": "Creator"
+              }
+            }
+          }
+        },
+        {
           "name": "sellerFeeBasisPoints",
           "type": "u16"
         },
@@ -309,6 +319,26 @@
     }
   ],
   "types": [
+    {
+      "name": "Creator",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "address",
+            "type": "publicKey"
+          },
+          {
+            "name": "verified",
+            "type": "bool"
+          },
+          {
+            "name": "share",
+            "type": "u8"
+          }
+        ]
+      }
+    },
     {
       "name": "AuthorityType",
       "type": {

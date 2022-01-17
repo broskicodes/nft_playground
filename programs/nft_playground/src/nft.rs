@@ -14,13 +14,29 @@ pub fn mint_nft(
   name: String, 
   symbol: String,
   uri: String,
-  // creators: Option<Vec<Creator>>,
+  creators: Option<Vec<Creator>>,
   seller_fee_basis_points: u16,
   update_authority_is_signer: bool,
   is_mutable: bool,
   max_supply: Option<u64>, 
 ) -> ProgramResult {
   let accounts = & ctx.accounts;
+
+  let good_creators = match creators {
+    Some(vec) => {
+      let mut new_vec = vec![];
+      for c in vec.iter() {
+        new_vec.push(metaplex_token_metadata::state::Creator {
+          address: c.address,
+          verified: c.verified,
+          share: c.share
+        });
+      }
+
+      Some(new_vec)
+    },
+    None => None
+  };
 
   let create_metadata_instruction = create_metadata_accounts(
     *accounts.token_metadata_program.key,
@@ -32,7 +48,7 @@ pub fn mint_nft(
     name,
     symbol,
     uri,
-    None,
+    good_creators,
     seller_fee_basis_points,
     update_authority_is_signer,
     is_mutable,
@@ -183,4 +199,13 @@ pub struct MintEditionFromMaster<'info> {
   pub system_program: Program<'info, System>,
   pub token_program: Program<'info, Token>,
   pub rent: Sysvar<'info, Rent>
+}
+
+// Duplication of mpl Creator struct for idl
+#[derive(AnchorSerialize, AnchorDeserialize, PartialEq, Debug, Clone)]
+pub struct Creator {
+    pub address: Pubkey,
+    pub verified: bool,
+    // In percentages, NOT basis points ;) Watch out!
+    pub share: u8,
 }
