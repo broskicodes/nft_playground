@@ -12,6 +12,7 @@ export const NftFetcher = () => {
   const { publicKey, sendTransaction } = useWallet();
   const walletObj = useAnchorWallet();
   const [nftMetadata, setNftMetadata] = useState([]);
+  const [nftImgSrc, setNftImgSrc] = useState([]);
 
   const getNfts = async () => {
     let tokenAccounts = await connection.getParsedTokenAccountsByOwner(
@@ -33,9 +34,11 @@ export const NftFetcher = () => {
 
     console.log(nfts);
     
-    nfts = await verifyNfts(nfts);
+    const mtdt = await verifyNfts(nfts);
+    console.log(mtdt);
 
-    setNftMetadata(nfts);
+    setNftMetadata(mtdt);
+    getImgBlobs(mtdt);
   }
 
   const verifyNfts = async (possibleNfts) => {
@@ -58,7 +61,7 @@ export const NftFetcher = () => {
       try {
         metadata = await Metadata.load(connection, metadataAccount);
         // nfts.push(metadata);
-        return metadata
+        return metadata;
       } catch(e) {
         return null;
       }
@@ -71,7 +74,27 @@ export const NftFetcher = () => {
 
     return nfts;
   }
-  
+
+  const getImgBlobs = async (mtdt) => {
+    let promises = mtdt.map(async (mtd) => {
+      const res = await fetch(mtd.data.data.uri);
+      const json = await res.json();
+
+      const imgRes = await fetch(json.image);
+      const imgBlob = await imgRes.blob();
+      console.log(imgBlob);
+
+      const imgSrc = URL.createObjectURL(imgBlob);
+
+      console.log(imgSrc)
+
+      return imgSrc;
+    });
+
+    const imgs = await Promise.all(promises);
+
+    setNftImgSrc(imgs);
+  }  
 
   useEffect(async () => {
     // const onLoad = async () => {
@@ -84,15 +107,13 @@ export const NftFetcher = () => {
 
   return (
     <div>
-      {nftMetadata.length > 0 && <ul>
-        {nftMetadata.map((mtd) => {
-          return (
-            <li>
-              {mtd.pubkey.toString()}
-            </li>
-          )
-        })}
-      </ul>}
+      {nftImgSrc.length > 0 && 
+        <div>
+          {nftImgSrc.map((imgSrc, i) => (
+            <img key={i} src={imgSrc} />
+          ))}
+        </div>  
+      }
     </div>
   )
 }
