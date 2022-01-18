@@ -143,15 +143,14 @@ export const ArweaveUploader = ({ selectedNft }) => {
 
   return (
     <div>
-      <label htmlFor="content">File: </label>
-      <input id="content" type="file" onChange={setFile} />
       <input id="name" type="text" placeholder="Name" onChange={setAttribute} />
       <input id="symbol" type="text" placeholder="Symbol" onChange={setAttribute} />
       <input id="description" type="text" placeholder="Desrciption" onChange={setAttribute} />
       <input id="sellerFeeBasisPoints" type="text" placeholder="Seller Fee Basis Points" onChange={setAttribute} />
       <input id="collection" type="text" placeholder="Collection" onChange={setAttribute} />
-
       <br />
+      <label htmlFor="content">File: </label>
+      <input id="content" type="file" onChange={setFile} />
       {/* <button onClick={uploadFile}>Upload</button>
       <button onClick={uploadMetadata}>Data</button> */}
       <Minter 

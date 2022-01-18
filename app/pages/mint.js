@@ -11,12 +11,12 @@ const MintPage = () => {
 
   return (
     <Wallet>
+      <ArweaveUploader 
+        selectedNft={selectedNft}
+      />
       <NftFetcher 
         selectedNft={selectedNft}
         setSelectedNft={setSelectedNft}
-      />
-      <ArweaveUploader 
-        selectedNft={selectedNft}
       />
     </Wallet>
   )

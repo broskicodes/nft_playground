@@ -6,8 +6,9 @@ import { Keypair, SystemProgram, Transaction, PublicKey } from '@solana/web3.js'
 import { Token, TOKEN_PROGRAM_ID } from '@solana/spl-token'
 import { Metadata } from "@metaplex-foundation/mpl-token-metadata";
 
+import { Nft } from "../Nft";
 
-export const NftFetcher = ({ setSelectedNft }) => {
+export const NftFetcher = ({ setSelectedNft, selectedNft }) => {
   const { connection } = useConnection();
   const { publicKey, sendTransaction } = useWallet();
   const walletObj = useAnchorWallet();
@@ -61,7 +62,7 @@ export const NftFetcher = ({ setSelectedNft }) => {
       try {
         metadata = await Metadata.load(connection, metadataAccount);
         // nfts.push(metadata);
-        acc.metdata = metadata;
+        acc.metadata = metadata;
         return acc;
       } catch(e) {
         return null;
@@ -110,14 +111,19 @@ export const NftFetcher = ({ setSelectedNft }) => {
   return (
     <div>
       {!!publicKey && 
-        <button onClick={getNfts}>
+        <button onClick={getNfts} className="bg-slate-400 rounded px-2 active:bg-slate-600 hover:bg-slate-500">
           Get Nfts
         </button>  
       }
       {nftMetadata.length > 0 && 
-        <div>
+        <div className="flex">
           {nftMetadata.map((mtdt, i) => (
-            <img key={i} src={mtdt.src} onClick={() => { setSelectedNft(mtdt) }} />
+            <Nft 
+              key={i}
+              metadata={mtdt}
+              setSelectedNft={setSelectedNft}
+              selected={selectedNft && selectedNft.mint === mtdt.mint}
+            />
           ))}
         </div>  
       }
